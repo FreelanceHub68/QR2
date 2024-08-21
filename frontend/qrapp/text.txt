@@ -1,0 +1,5 @@
+Data base 
+1.Table 
+2.Cart
+3.user=admin,chief
+4.orders=tableid=orders
