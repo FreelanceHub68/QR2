@@ -5,12 +5,52 @@ const cors = require("cors");
 const { doc } = require("firebase/firestore");
 const  {db,Product,Cart,Table }  = require('./config');
 const { getDocs, collection,getDoc,setDoc } = require('@firebase/firestore');
-
+const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 
 app.use(cors());
 app.use(express.json());
+
+
+//loginApi
+app.get("/login",(req,res)=>{
+
+})
+
+app.post("/login",async (req,res)=>{
+  
+  const {email,password,option}=req.body;
+  console.log(email)
+  console.log(password);
+  console.log(option)
+  
+  
+  const docRef = doc(db, 'User', option);
+  const docSnap = await getDoc(docRef);
+
+  const saltRounds = 10;
+
+const plainTextPassword=password
+  bcrypt.hash(plainTextPassword, saltRounds, function(err, hashedPassword) {
+    if (err) {
+        console.error('Error hashing password:', err);
+    } else {
+        console.log('Hashed password:', hashedPassword);
+    }
+});
+
+
+  if(docSnap.exists()){
+    const Data=docSnap.data();
+    if(Data.Email==email && Data.Password){
+      
+    }
+  }
+
+
+
+})
 
 
 // AUTH API
