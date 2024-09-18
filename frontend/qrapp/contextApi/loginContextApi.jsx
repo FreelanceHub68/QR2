@@ -1,50 +1,52 @@
 "use client"
-import React, { createContext, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useContext } from 'react';
-export const LoginContext = createContext();
 
-export default function Loginprovider({ children }){
-  
+import axios from "axios";
+import  {useRouter}  from "next/navigation";
+const { createContext, useContext } = require("react");
 
-    const handleSubmit=async ({email,password,option})=>{
-      let data={
-        email,
-        password,
-        option
-      }
-    
-      try {
-        //made a post req to CartAPi
-      //   Post Req of CartApi
-  
-          const response = await fetch('http://localhost:4000/login', { // Update with your server URL
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(data),
-            });
-  
-            const result = await response.json();
-        console.log('Server response:', result);
-        } catch (error) {
-          console.error('Error sending data:', error);
-      }   
-    
-    }
-    
+export const LoginContext=createContext();
 
+export default function LoginProvider({children}){  
 
+const router=useRouter();
 
-  return (
-    <LoginContext.Provider value={{handleSubmit}}>
-      { children }
-    </LoginContext.Provider>
+ const handleSubmit = async ({email,password,selectedValue}) =>{
+
+ const data={
+  email,password,selectedValue
+ }
+
+  const response = await axios.post('http://localhost:4000/loginApi', 
+    data ,{  // Send id in the request body
+     headers: {
+       'Content-Type': 'application/json',
+     },
+   }
   );
-;
+  console.log(response.data.type);
+  switch (response.data.type) {
+    case "admin" :
+      router.push('/pages/admin'); 
+      // enqueueSnackbar(response.data.message, { variant: 'success' });
+      break;
+    case "chief":
+      router.push('/pages/login'); 
+      // enqueueSnackbar(response.data.message, { variant: 'error' });
+      break;
+    default:
+      // Handle other cases or do nothing
+      break;
+  }
+
+//  if message is admin then redirect to the  pages/admin
+// if message is chief then redict to the pages/chief
+}
+ 
+    return(
+    <LoginContext.Provider value={{handleSubmit}}>
+        {children}
+    </LoginContext.Provider>
+  )
 }
 
-export const  useLoginContext =()=>useContext(LoginContext);
-
-
+export const useLoginContext =()=>useContext(LoginContext);

@@ -1,0 +1,881 @@
+"use client"
+import React, { createContext, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useContext } from 'react';
+export const AdminContext = createContext();
+
+export default function Adminprovider({ children }){
+  
+  return (
+    <AdminContext.Provider >
+      { children }
+    </AdminContext.Provider>
+  );
+;
+}
+
+export const  useadminContext =()=>useContext(AdminContext);
+
+"use client"
+import React, { createContext, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useContext } from 'react';
+export const LoginContext = createContext();
+
+export default function Loginprovider({ children }){
+  
+
+    const handleSubmit=async ({email,password,option})=>{
+      let data={
+        email,
+        password,
+        option
+      }
+    
+      try {
+        //made a post req to CartAPi
+      //   Post Req of CartApi
+  
+          const response = await fetch('http://localhost:4000/login', { // Update with your server URL
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(data),
+            });
+  
+            const result = await response.json();
+        console.log('Server response:', result);
+        } catch (error) {
+          console.error('Error sending data:', error);
+      }   
+    
+    }
+    
+
+
+
+  return (
+    <LoginContext.Provider value={{handleSubmit}}>
+      { children }
+    </LoginContext.Provider>
+  );
+;
+}
+
+export const  useLoginContext =()=>useContext(LoginContext);
+
+"use client"
+import React, { createContext, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useContext } from 'react';
+export const ProductContext = createContext();
+
+export default function Productprovider({ children }){
+  
+    
+      
+    
+
+
+
+  return (
+    <ProductContext.Provider >
+      { children }
+    </ProductContext.Provider>
+  );
+;
+}
+
+export const  useProductContext =()=>useContext(ProductContext);
+
+"use client"
+
+import Adminprovider from "../../../../contextApi/adminContextApi";
+
+
+export default function Layout({ children }) {
+  return (
+<Adminprovider>
+           {children}
+</Adminprovider>      
+     
+       
+    );
+}
+
+"use client"
+
+import Productprovider from "../../../../../contextApi/productContextApi";
+
+export default function Layout({ children }) {
+  return (
+<Productprovider>    
+  {children}
+</Productprovider>
+     
+       
+    );
+}
+
+"use client"
+
+import Loginprovider from "../../../../contextApi/loginContextApi";
+
+export default function Layout({ children }) {
+  return (
+<Loginprovider>
+           {children}
+</Loginprovider>      
+     
+       
+    );
+}
+
+"use client"
+import Image from "next/image";
+import Cocktail from "../../../public/cocktail.png"
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+export default function Menu(){
+    const [data,setData]=useState();
+
+    // get table id 
+    const searchParams = useSearchParams();
+    // Check if searchParams has 'get' method
+    if (typeof searchParams.get !== 'function') {
+        console.error('searchParams.get is not a function');
+        return null;
+    }
+    const id = searchParams.get('id');
+
+    
+    // save into localstoarge
+    
+    
+    // get data from product Api
+  // fetch category from prodcutApi get method
+  
+  useEffect(() => {
+    const fetchData = async () => {
+        try {
+        const response = await fetch('http://localhost:4000/productApi');
+        const result = await response.json();
+        setData(result.list);
+    } catch (error) {
+        console.error('Fetch error:', error);
+    } 
+}
+fetchData();
+localStorage.setItem('id',id); 
+}, []);
+
+
+const productNames = data?.flatMap(item => item.product.map(product => product));
+console.log(productNames);
+return (
+        <>
+      {/* <div className="flex flex-col justify-center items-center  h-screen">
+      <div className=" h-screen mt-10 w-[1200px]">
+<h1 className="text-3xl ml-5 border-b-2 p-3 border-black">Menu</h1>
+<div className=" flex flex-wrap">
+
+
+
+
+
+      </div>
+      </div> */} 
+      {/* </div> */}
+
+
+ <div className="h-screen bg-white flex justify-start items-center flex-col  ">
+    <div className=" w-[1250px] h-24 pl-5 pt-7">
+       <h1 className="text-3xl font-bold border-b-2 border-black  py-2 px-3 ">Cart</h1>
+    </div>
+    <div className="h-max  w-[1250px] flex justify-center item-center border border-red-400  flex-wrap ">
+
+    {/* <article class="relative isolate flex flex-col justify-end overflow-hidden rounded-2xl px-8 pb-8 h-64 w-64 pt-40 max-w-sm mx-auto mt-12 hover:cursor-pointer">
+    <Image src={Cocktail} alt="Category image" className="absolute inset-0  object-cover" height="auto" width="auto"  priority  />
+    <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40"></div>
+    <h3 class="z-10 mt-3 text-3xl font-bold text-white">Ice-cream</h3>
+    <div class="z-10 gap-y-1 overflow-hidden text-sm leading-6 text-gray-300"></div>
+</article> */}
+
+
+  
+
+
+<Link href={`/pages/submenu?id=${id}`} className="h-max flex   w-[1250px]  justify-center item-center  flex-wrap">
+{productNames?.map((doc) => (
+    <article
+    className="relative isolate flex flex-col justify-end overflow-hidden rounded-2xl px-8 pb-8 h-64 w-64 pt-40 max-w-sm mx-auto mt-12 hover:cursor-pointer"
+    key={doc.id}
+    >
+                    <Image
+                        src={doc.imageURL}
+                        alt="Category image"
+                        className="absolute inset-0 object-cover"
+                        height={500} // Replace with actual height
+                        width={500} // Replace with actual width
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40"></div>
+                    <h3 className="z-10 mt-3 text-3xl font-bold text-white">{doc.id}</h3>
+                    <div className="z-10 gap-y-1 overflow-hidden text-sm leading-6 text-gray-300"></div>
+                </article>
+            ))}
+
+            </Link>
+
+
+    </div>
+    </div>     
+       </>
+    )
+}
+
+
+   <div className="h-screen justify-start items-center">
+           <div className=" mx-24 mt-16">
+           <h1 className="text-4xl font-bold  border-b-2 border-black p-3">Menu:</h1>
+           </div>
+           <div className="  flex flex-wrap justify-center items-center   mt-12">
+           {productNames?.map((doc,index) => (
+          
+    <article
+    className="relative isolate flex flex-col justify-end overflow-hidden rounded-2xl px-8 pb-8 h-64 w-64 pt-40 max-w-sm mx-auto  hover:cursor-pointer" key={index}>
+                    <Image
+                        src={doc.imageURL}
+                        alt="Category image"
+                        className="absolute inset-0 object-cover"
+                        height={500} // Replace with actual height
+                        width={500} // Replace with actual width
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40"></div>
+                    <h3 className="z-10 mt-3 text-3xl font-bold text-white">{doc.id}</h3>
+                    <div className="z-10 gap-y-1 overflow-hidden text-sm leading-6 text-gray-300"></div>
+                </article>
+            </Link>
+            ))}
+
+            </div>
+
+</div>
+
+
+   <div className="bg-zinc-200  h-screen border border-black ">
+            <div className="  mx-24 my-36 bg-white shadow-xl rounded-2xl">
+           <div className="bg-white rounded-tl-xl rounded-tr-xl">
+            <h1 className="text-2xl px-24 py-2 border-b-2 border-black">Submenu</h1>
+           </div>
+
+           <div className="bg-white p-5">
+
+           </div>
+            </div>
+        </div>
+
+
+         <table className="w-full">
+                    <thead>
+                        <tr>
+                            <th className="border-b-2 border-black p-3">Sr</th>
+                            <th className="border-b-2 border-black p-3">Product Name</th>
+                            <th className="border-b-2 border-black p-3">Price</th>
+                            <th className="border-b-2 border-black p-3">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody className="border border-black">
+                        {data?.map((doc, index) => (
+                            <tr key={doc.id}>
+                                <td className="text-center p-5">{index + 1}</td> {/* Serial number starts from 1 */}
+                                {/* <td className="text-center p-5">{doc.name}</td>
+                                <td className="text-center p-5">{doc.price}</td>
+                                <td className="text-center p-5">
+                                    <button className="bg-red-500 text-white w-24 h-10" onClick={()=>{Addtocart({tableid:tableid1,name:doc.name,price:doc.price,id:doc.id}),increment()}}> ADD </button>
+                                </td>
+                            </tr>
+                        ))} */}
+                    {/* </tbody> */}
+                </table>
+
+
+                            <div className="flex border border-black h-screen justify-center items-center flex-col">
+                <div className="border h-[600px] w-[1200px]  bg-zinc-100 shadow-xl rounded-xl p-10 overflow-y-scroll showscroll">
+                    <div className=" flex flex-col rounded-lg ">
+                        <h1 className=" text-xl p-1 border-b-2 border-pink-600">Cart</h1>
+                        <div className="h-24 w-full flex justify-around items-center rounded-md bg-white my-5">
+                            <div className=" w-auto h-auto ">
+                                <h1 className="text-xl">1</h1>
+                            </div>
+
+                            <div className=" w-auto h-auto ">
+                                <h1 className="text-xl">Ice-cream</h1>
+                            </div>
+
+                            <div className=" flex justify-center items-center w-auto h-auto ">
+                                <button className="w-8 h-8 bg-pink-500 text-white rounded-sm shadow-2xl mx-2 active:bg-pink-400 "><FaPlus size={20} className="text-white mx-1.5" /></button>
+                                1
+                                <button className="w-8 h-8 bg-pink-500 text-white rounded-sm shadow-2xl mx-2 active:bg-pink-400"><FaMinus size={20} className="text-white mx-1.5" /></button>
+                            </div>
+
+                            <div className=" flex justify-center items-center w-auto h-auto ">
+                                <MdDelete size={30} className="text-red-600" />
+                            </div>
+                        </div>
+
+                        <div className="h-24 w-full flex justify-around items-center rounded-md bg-white my-5">
+                            <div className=" w-auto h-auto ">
+                                <h1 className="text-xl">1</h1>
+                            </div>
+
+                            <div className=" w-auto h-auto ">
+                                <h1 className="text-xl">Ice-cream</h1>
+                            </div>
+
+                            <div className=" flex justify-center items-center w-auto h-auto ">
+                                <button className="w-8 h-8 bg-pink-500 text-white rounded-sm shadow-2xl mx-2 active:bg-pink-400 "><FaPlus size={20} className="text-white mx-1.5" /></button>
+                                1
+                                <button className="w-8 h-8 bg-pink-500 text-white rounded-sm shadow-2xl mx-2 active:bg-pink-400"><FaMinus size={20} className="text-white mx-1.5" /></button>
+                            </div>
+
+                            <div className=" flex justify-center items-center w-auto h-auto ">
+                                <MdDelete size={30} className="text-red-600" />
+                            </div>
+                        </div>
+
+                        <div className="h-24 w-full flex justify-around items-center rounded-md bg-white my-5">
+                            <div className=" w-auto h-auto ">
+                                <h1 className="text-xl">1</h1>
+                            </div>
+
+                            <div className=" w-auto h-auto ">
+                                <h1 className="text-xl">Ice-cream</h1>
+                            </div>
+
+                            <div className=" flex justify-center items-center w-auto h-auto ">
+                                <button className="w-8 h-8 bg-pink-500 text-white rounded-sm shadow-2xl mx-2 active:bg-pink-400 "><FaPlus size={20} className="text-white mx-1.5" /></button>
+                                1
+                                <button className="w-8 h-8 bg-pink-500 text-white rounded-sm shadow-2xl mx-2 active:bg-pink-400"><FaMinus size={20} className="text-white mx-1.5" /></button>
+                            </div>
+
+                            <div className=" flex justify-center items-center w-auto h-auto ">
+                                <MdDelete size={30} className="text-red-600" />
+                            </div>
+                        </div>
+
+
+                        <div className="h-24 w-full flex justify-around items-center rounded-md bg-white my-5">
+                            <div className=" w-auto h-auto ">
+                                <h1 className="text-xl">1</h1>
+                            </div>
+
+                            <div className=" w-auto h-auto ">
+                                <h1 className="text-xl">Ice-cream</h1>
+                            </div>
+
+                            <div className=" flex justify-center items-center w-auto h-auto ">
+                                <button className="w-8 h-8 bg-pink-500 text-white rounded-sm shadow-2xl mx-2 active:bg-pink-400 "><FaPlus size={20} className="text-white mx-1.5" /></button>
+                                1
+                                <button className="w-8 h-8 bg-pink-500 text-white rounded-sm shadow-2xl mx-2 active:bg-pink-400"><FaMinus size={20} className="text-white mx-1.5" /></button>
+                            </div>
+
+                            <div className=" flex justify-center items-center w-auto h-auto ">
+                                <MdDelete size={30} className="text-red-600 hover:cursor-pointer active:text-red-400" />
+                            </div>
+                        </div>
+
+
+ 
+
+                    </div>
+
+                </div>
+                <div className=" w-96 mt-10 flex justify-center items-center">
+   <button className="bg-red-600 text-white w-24 h-10 rounded-md mx-3 flex justify-center items-center"><IoMdArrowBack size={20} className="text-white" /><span className="mx-1">BACK</span>  </button>
+   <button className="bg-green-600 text-white w-24 h-10 rounded-md mx-3 flex justify-center items-center"><span className="mx-1"> BUY</span><IoArrowForwardOutline size={20} className="text-white"/></button>
+                       </div>
+
+            </div>
+
+            {Product?.map((doc, index) => (
+                            <tr key={doc.id}>
+                                <td className="text-center p-5">{index + 1}</td> {/* Serial number starts from 1 */}
+                             <td className="text-center p-5">{doc.name}</td>
+                                <td className="text-center p-5">{doc.price}</td>
+                                <td className="text-center p-5">
+                                    <button className="bg-red-500 text-white w-24 h-10 rounded-md" onClick={()=>{Addtocart({tableid:Id.id,name:doc.name,price:doc.price,id:doc.id}),increment()}}> ADD </button>
+                                </td>
+                            </tr>
+                        ))}  
+
+
+ <table className=" border border-black w-24 ">
+            <thead className=" ">
+                <th className="border-b-2 border-black px-20 py-3 " >Sr no</th>
+                <th className="border-b-2 border-black px-20 py-3 " >Product Name</th>
+                <th className="border-b-2 border-black px-20 py-3 " >Amount</th>
+                <th className="border-b-2 border-black px-20 py-3 " >Remove</th>
+            </thead>
+            <tbody className="">
+                <tr className="">
+                <td className="text-center py-5">1</td>
+               <td className="text-center py-5">Name</td>
+               <td className="text-center py-5">
+                <span className="flex justify-center items-center">
+                <button className="mx-1 bg-black text-white w-6 h-6  rounded-full active:bg-white active:text-black "><FaPlus className="mx-1"/></button>
+<span className="text-xl">1</span>
+               <button className="mx-1 bg-black text-white w-6 h-6  rounded-full active:bg-white active:text-black "><FaMinus className="mx-1"/></button>
+                </span>
+               </td>
+               <td className="text-center py-5 flex justify-center items-center">
+                <MdDelete size={25} className="text-red-600 cursor-pointer active:text-red-50"/>
+               </td>     
+                </tr>
+
+                <tr className="">
+                <td className="text-center py-5">1</td>
+               <td className="text-center py-5">Name</td>
+               <td className="text-center py-5">
+                <span className="flex justify-center items-center">
+                <button className="mx-1 bg-black text-white w-6 h-6  rounded-full active:bg-white active:text-black "><FaPlus className="mx-1"/></button>
+<span className="text-xl">1</span>
+               <button className="mx-1 bg-black text-white w-6 h-6  rounded-full active:bg-white active:text-black "><FaMinus className="mx-1"/></button>
+                </span>
+               </td>
+               <td className="text-center py-5 flex justify-center items-center">
+                <MdDelete size={25} className="text-red-600 cursor-pointer active:text-red-50"/>
+               </td>     
+                </tr>
+
+                <tr className="">
+                <td className="text-center py-5">1</td>
+               <td className="text-center py-5">Name</td>
+               <td className="text-center py-5">
+                <span className="flex justify-center items-center">
+                <button className="mx-1 bg-black text-white w-6 h-6  rounded-full active:bg-white active:text-black "><FaPlus className="mx-1"/></button>
+<span className="text-xl">1</span>
+               <button className="mx-1 bg-black text-white w-6 h-6  rounded-full active:bg-white active:text-black "><FaMinus className="mx-1"/></button>
+                </span>
+               </td>
+               <td className="text-center py-5 flex justify-center items-center">
+                <MdDelete size={25} className="text-red-600 cursor-pointer active:text-red-50"/>
+               </td>     
+                </tr>
+               
+
+            </tbody>
+        </table>
+
+                                    <table className="   ">
+                                <thead className=" ">
+                                    <tr>
+                                        <th className="border-b-2 border-black px-12 py-3 " >Sr no</th>
+                                        <th className="border-b-2 border-black px-12 py-3 " >Product Name</th>
+                                        <th className="border-b-2 border-black px-12 py-3 " >Amount</th>
+                                        <th className="border-b-2 border-black px-12 py-3 " >Remove</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="">
+                              
+      
+<tr className="border border-black ">
+    {productNames == 0 ? (
+<div className="">
+    hello
+</div>
+) : (
+          productNames?.map((product, index) => (
+            <tr key={index}> {/* Add a unique key for each row */}
+              {/* Add table cells based on product properties */}
+              <td>{product.name}</td> {/* Example cell for product name */}
+            </tr>
+          ))
+        )}
+
+
+        {
+                            data?.map((doc)=>{
+                              <div key={doc.id}>
+                                  <div className="flex w-56 my-1">
+                                    <h2 className="text-lg font-bold ">Total-Item: </h2>  <span className="ml-28">{doc.totalItem}</span>
+                                </div>
+                                <div className="flex w-56 my-1">
+                                    <h2 className="text-lg font-bold ">Total-Amount: </h2>  <span className="ml-[82px]">{doc.totalAmount}</span>
+                                </div>
+
+                                <div className="w-64 border border-pink-600 my-2"></div>
+                                <div className="flex w-56 my-1">
+                                    <h2 className="text-lg font-bold ">Total:</h2> <span className="ml-40 my-1">{doc.totalAmount}</span>
+                                </div>
+                                </div>   
+                            })
+                        }
+</tr>
+
+
+
+                                </tbody>
+                            </table>
+                        </div>
+    
+
+
+
+
+
+
+
+
+
+
+
+//############################loginApi###############################
+
+app.get("/login",(req,res)=>{
+
+})
+
+app.post("/login",async (req,res)=>{
+
+
+})
+
+
+//################################# AUTH API ##################################
+app.get('/authApi', (req, res) => {
+ 
+});
+
+app.post('/authApi',async (req, res) => {
+    const {id} = req.body; // Extract TableId from request body
+
+try{
+
+  let cart={
+    cart:[],
+    totalItem:0,
+    totalAmount:0
+  }
+    // Reference to the document in 'Table' collection
+    const docRef = doc(db, 'Table', id);
+    const docSnap = await getDoc(docRef);
+
+    // Checked if the document exists
+    if (docSnap.exists()) {
+      const DocData = docSnap.data();
+      console.log('Document data:', DocData);
+      // Reference to the document in 'Cart' collection
+      const CartRef = doc(db, 'Cart',id);
+
+      // Saved the data to the 'Cart' collection
+      await setDoc(CartRef,cart, { merge: true });
+
+      res.status(200).send('Document added to cart');
+    } else {
+      res.status(404).send('No such document in Table collection');
+    }
+  } catch (error) {
+    console.error('Error processing request: ', error);
+    res.status(500).send('Internal Server Error');
+  };
+})
+
+
+//###################################  Product Api ####################################
+// menu to show category
+app.get('/productApi',async(req,res)=>{
+  const Product = collection(db, "Product");
+  const snapshot = await getDocs(Product);
+  const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  console.log(list);
+  res.send(list);
+})
+
+// adminaddproduct
+app.post('/productApi', async (req, res) => {
+  const { name, price, decs , category,imageURL } = req.body;
+
+  // Define the new product data
+  const newProduct = {id:category,name, price, decs ,imageURL};
+
+  try {
+    // Reference to the Firestore document
+    const docRef = doc(db, 'Product', category);
+
+    // Fetch the current document data
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      // If the document exists, update it
+      const productData = docSnap.data();
+      if (!productData.product) {
+        productData.product = []; // Initialize product array if not present
+      }
+      productData.product.push(newProduct);
+      
+      // Update the document with the new product list
+      await setDoc(docRef, productData);
+    } else {
+      // If the document doesn't exist, create a new one
+      const productData = { product: [newProduct] };
+      await setDoc(docRef, productData); 
+    }
+
+    // Send a success response
+    res.status(200).send({message:"Data added successfully"});
+
+  } catch (error) {
+    // Handle errors and send an error response
+    console.error("Error adding product: ", error);
+    res.status(500).send({error:"Product is not added"});
+  }
+});
+
+// ################################# SubmenuApi #################################
+app.get('/submenuApi', async (req, res) => {
+//  not used
+});
+
+app.post('/submenuApi', async (req, res) => {
+// get catergory id
+  const {id}=req.body;
+console.log(id)
+
+try {
+//Get particular data from submenu
+const docRef = doc(db, 'Product', id);
+const docSnap = await getDoc(docRef);
+
+// save document into data
+const data=docSnap.data();
+console.log(data.product);
+
+//send data to the submenu component 
+res.status(200).send(data);  
+} catch (error) {
+  console.log("Error occurs" ,error);
+  res.status(200).send({Error:"Error occurs"});
+}
+
+});
+
+
+//################################## CartAPI ###################################
+// not used
+app.get('/cartApi', async (req, res) => {
+  const Cart = collection(db, "Cart");
+  const snapshot = await getDocs(Cart);
+  const CartState = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  res.status(200).send(CartState)
+});
+
+// Addtocart
+app.post('/cartApi', async (req, res) => {
+  const {id,name,price,tableid,amount} = req.body;
+   
+  console.log(tableid);
+  const data={
+   id,name,price,amount
+  }
+  const quantity = Number.parseInt(amount);
+ //get data from the  
+   const CartRef=doc(db,'Cart',tableid)
+ 
+   const DocRef=await getDoc(CartRef);
+   const CartData=DocRef.data();
+  
+   console.log(CartData,"hello");
+ 
+ 
+   try {
+ 
+     const itemIndex = CartData.cart.findIndex(item => item.id === data.id);
+
+     if (itemIndex !== -1 && quantity <= 0) {
+       CartData.cart.splice(indexFound, 1);
+       if (CartData.cart.length == 0) {
+         CartData.cart.subTotal = 0;
+       } else {
+         CartData.cart[itemIndex].quantity += quantity;
+         CartData.cart[itemIndex].total = CartData.cart[itemIndex].quantity * CartData.cart[itemIndex].price;
+   
+         // Update subtotal and other properties
+         CartData.cart.subTotal = CartData.cart.map(item => item.total).reduce((acc, next) => acc + next, 0);
+         CartData.totalItem = CartData.cart.length;
+         CartData.totalAmount = CartData.cart.subTotal;
+       }
+
+      }
+    //----------Check if product exist, just add the previous quantity with the new quantity and update the total price-------
+   else if (itemIndex !== -1) {
+       CartData.cart[itemIndex].quantity = CartData[itemIndex].quantity + quantity;
+       CartData.cart[itemIndex].total = CartData[itemIndex].quantity * data.price;
+       CartData.cart[itemIndex].price = data.price
+       CartData.cart.subTotal = CartData.cart.map(item => item.total).reduce((acc, next) => acc + next);
+   }
+   //----Check if quantity is greater than 0 then add item to items array ----
+   else if (quantity > 0) {
+       CartData.cart.push({
+           name: id,
+           quantity: quantity,
+           price: data.price,
+           total: parseInt(data.price * quantity)
+       })
+       CartData.cart.subTotal = CartData.cart
+       .map(item => item.total)
+       .reduce((acc, next) => acc + next, 0);
+     CartData.totalItem = CartData.cart.length;
+     CartData.totalAmount = CartData.cart.subTotal;
+     await setDoc(CartRef, CartData);
+ 
+     res.status(200).json({
+      type: "success",
+      message:"Product added sucessfully!!"
+  })
+
+   }
+   //----If quantity of price is 0 throw the error -------
+   else {
+       return res.status(400).json({
+           type: "Invalid",
+           msg: "Invalid request"
+          })
+   }
+  }
+  catch(error){
+    res.status(500).error(error);
+  }
+     // Set the updated data in Firestore  
+})
+
+// inc dec from cart  
+app.put('/cartApi',async(req,res)=>{
+  const { name, action, quantity, price } = req.body;
+console.log(action);
+const Qty = Number.parseInt(quantity);
+const CartRef = doc(db, 'Cart', 'Table_no_4');
+const DocRef = await getDoc(CartRef);
+
+if (!DocRef.exists()) {
+  console.error('Cart not found');
+  return; // or send an error response
+}
+
+const CartData = DocRef.data();
+
+try {
+  const itemIndex = CartData.cart.findIndex(item => item.name === name);
+
+  if (action === "inc") {
+    // Update item quantity and price
+    CartData.cart[itemIndex].quantity += Qty; // Increment by Qty
+    CartData.cart[itemIndex].total = CartData.cart[itemIndex].quantity * price;
+    CartData.cart[itemIndex].price = price;
+    CartData.cart.subTotal = CartData.cart
+    .map(item => item.total)
+    .reduce((acc, next) => acc + next, 0);
+    CartData.totalAmount = CartData.cart.subTotal;
+    await setDoc(CartRef, CartData);
+  } else if (action === "dec") {
+    // Decrement logic
+    if (CartData.cart[itemIndex].quantity <= Qty) {
+      // Remove item if quantity is zero or less
+      CartData.cart.splice(itemIndex, 1);
+    } else {
+      CartData.cart[itemIndex].quantity -= Qty;
+      CartData.cart[itemIndex].total = CartData.cart[itemIndex].quantity * price;
+    }
+  } else {
+    console.error('Invalid action');
+    return; // or send an error response
+  }
+
+   res.status(200).send({message:"cart status updated !!!!"});
+
+
+  } catch (error) {
+    console.log('Error occurs:' , error)
+    res.status(500).send({error:'Internal Server Error'});
+  }
+      
+   
+})
+
+// delete from cart
+app.delete('/cartApi',async(req,res)=>{
+  const {id,Name,Amount,Price}=req.body;
+  
+  const data={
+    id,Name,Amount,Price
+   }
+  //GET data from the  CART 
+  const CartRef=doc(db,'Cart',id)
+  
+  const DocRef=await getDoc(CartRef);
+  const CartData=DocRef.data();
+
+  try {
+
+   const updatedCart = CartData.cart.findIndex(item => item.id !== id);
+   CartData.cart.push(updatedCart);
+   CartData.totalItem -= data.Amount; // Update totalItem
+   CartData.totalAmount -= data.Price; // Update totalAmount
+
+   await setDoc(CartRef, CartData);
+   
+    res.status(200).send('Document Deleted sucessfully');
+  } catch (error) {
+    console.log('Error occurs:' , error)
+    res.status(500).send('Internal Server Error');  
+  }
+
+})
+
+
+
+//################################ BuyApi ###################################
+app.get('/buyApi', (req, res) => {
+
+
+});
+
+
+
+app.post('/buyApi', (req, res) => {
+//save data to order data base 
+ try {
+
+  
+ } catch (error) {
+  console.log('Error occurs:' , error)
+  res.status(500).send('Internal Server Error');
+ }
+
+});
+
+
+
+
+//################################### orderapi ####################################
+app.get('/orderApi', (req, res) => {
+
+// fetch data from the order database and show it on admin dashboard as well as chief
+});
+
+
+
+
+app.post('/orderApi', (req, res) => {
+//save admin action proceed to bill then make Proceed_to_bill=="OK";
+// in cheif if action == completed then field order=="completed"
+ try {
+
+  
+ } catch (error) {
+  console.log('Error occurs:' , error)
+  res.status(500).send('Internal Server Error');
+ }
+
+});

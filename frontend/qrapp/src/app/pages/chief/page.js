@@ -1,10 +1,10 @@
-import Admin from "@/app/component/client/admin";
+import Category from "@/app/component/category";
 
 export default function Page(){
-
+    
     return(
         <>
-        <Admin/>
+        <Category/>
         </>
     )
 }

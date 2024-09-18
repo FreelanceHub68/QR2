@@ -1,4 +1,4 @@
-export default function admindashboard(){
+export default function cheif(){
     // on sidebar show all table option 
     // on side bar if table order increased then show indicator
     // fetch cart status 

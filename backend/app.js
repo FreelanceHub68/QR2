@@ -3,8 +3,8 @@ const app = express();
 const bodyParser = require('body-parser');
 const cors = require("cors");
 const { doc } = require("firebase/firestore");
-const  {db,Product,Cart,Table }  = require('./config');
-const { getDocs, collection,getDoc,setDoc } = require('@firebase/firestore');
+const { db, Product, Cart, Table } = require('./config');
+const { getDocs, collection, getDoc, setDoc } = require('@firebase/firestore');
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
@@ -12,64 +12,65 @@ require('dotenv').config();
 app.use(cors());
 app.use(express.json());
 
+//############################loginApi###############################
 
-//loginApi
-app.get("/login",(req,res)=>{
-
-})
-
-app.post("/login",async (req,res)=>{
-  
-  const {email,password,option}=req.body;
-  console.log(email)
-  console.log(password);
-  console.log(option)
-  
-  
-  const docRef = doc(db, 'User', option);
-  const docSnap = await getDoc(docRef);
-
-  const saltRounds = 10;
-
-const plainTextPassword=password
-  bcrypt.hash(plainTextPassword, saltRounds, function(err, hashedPassword) {
-    if (err) {
-        console.error('Error hashing password:', err);
-    } else {
-        console.log('Hashed password:', hashedPassword);
-    }
-});
-
-
-  if(docSnap.exists()){
-    const Data=docSnap.data();
-    if(Data.Email==email && Data.Password){
-      
-    }
-  }
-
-
+app.get("/login", (req, res) => {
 
 })
 
+app.post("/loginApi", async (req, res) => {
+   
+  const {email,password,selectedValue}=req.body;
+  
+if(selectedValue=="admin"){
+  
+  const UserRef = doc(db, 'User', selectedValue);
+  const docSnap = await getDoc(UserRef);
+  const Userdata = docSnap.data();
+console.log(Userdata);
 
-// AUTH API
-app.get('/authApi', (req, res) => {
-  res.send({hello:"hello"});
-});
+if(Userdata.Email==email && Userdata.Password==password){
+  res.status(200).send({type:"admin"})
+  // console.log("user and password match")
+}
+else{
+  res.status(400).json({
+    Message:"User Credentials is not correct!"
+  })
+  // res.redirect('/pages/login')
+  console.log("user and password match")
+}
 
-app.post('/authApi',async (req, res) => {
+
+
+  }else if(selectedValue=="chief"){
+
+}
+else{
+   console.log("error to login");
+}
+
+}
+)
+
+
+//################################# AUTH API ##################################
+// app.get('/authApi', (req, res) => {
+
+// });
+
+app.post('/authApi', async (req, res) => {
+  // console.log();
+
+  const id = req.body.id; // Extract TableId from request body
 
   try {
-    const TableId = req.body.TableId; // Extract TableId from request body
-    const id = TableId;
 
-  let cart={
-    cart:[],
-    totalItem:0,
-    totalAmount:0
-  }
-
+    let cart = {
+      cart: [],
+      totalItem: 0,
+      totalAmount: 0
+    }
     // Reference to the document in 'Table' collection
     const docRef = doc(db, 'Table', id);
     const docSnap = await getDoc(docRef);
@@ -77,12 +78,12 @@ app.post('/authApi',async (req, res) => {
     // Checked if the document exists
     if (docSnap.exists()) {
       const DocData = docSnap.data();
-      console.log('Document data:', DocData);
+      // console.log('Document data:', DocData);
       // Reference to the document in 'Cart' collection
-      const CartRef = doc(db, 'Cart',id);
+      const CartRef = doc(db, 'Cart', id);
 
       // Saved the data to the 'Cart' collection
-      await setDoc(CartRef,cart, { merge: true });
+      await setDoc(CartRef, cart, { merge: true });
 
       res.status(200).send('Document added to cart');
     } else {
@@ -91,192 +92,431 @@ app.post('/authApi',async (req, res) => {
   } catch (error) {
     console.error('Error processing request: ', error);
     res.status(500).send('Internal Server Error');
-  }
+  };
+})
 
 
+//###################################  Product Api ####################################
+// menu to show category
+app.get('/productApi', async (req, res) => {
 
-});
+  const id = req.query.id;
+  console.log(id);
 
-// Product Api
-app.get('/productApi',async(req,res)=>{
   const Product = collection(db, "Product");
-  
   const snapshot = await getDocs(Product);
   const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-
   res.send(list);
 })
 
-app.post('/productApi',(req,res)=>{
-   
-})
+// // adminaddproduct
+// app.post('/productApi', async (req, res) => {
+//   const { name, price, decs , category,imageURL } = req.body;
 
+//   // Define the new product data
+//   const newProduct = {id:category,name, price, decs ,imageURL};
 
-// CartAPI
-app.get('/cartApi', async (req, res) => {
-  //get all data from the 'CART' database 
- const snapshot = await getDocs(Cart);
- const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
- //Set data as response
- res.send(list);
-});
+//   try {
+//     // Reference to the Firestore document
+//     const docRef = doc(db, 'Product', category);
 
-app.post('/cartApi', async (req, res) => {
- const {id,Name,Amount,Price,tableId} = req.body;
+//     // Fetch the current document data
+//     const docSnap = await getDoc(docRef);
 
+//     if (docSnap.exists()) {
+//       // If the document exists, update it
+//       const productData = docSnap.data();
+//       if (!productData.product) {
+//         productData.product = []; // Initialize product array if not present
+//       }
+//       productData.product.push(newProduct);
 
- const data={
-  id,Name,Amount,Price,tableId
- }
+//       // Update the document with the new product list
+//       await setDoc(docRef, productData);
+//     } else {
+//       // If the document doesn't exist, create a new one
+//       const productData = { product: [newProduct] };
+//       await setDoc(docRef, productData); 
+//     }
 
-//get data from the  
-  const CartRef=doc(db,'Cart',tableId)
+//     // Send a success response
+//     res.status(200).send({message:"Data added successfully"});
 
-  const DocRef=await getDoc(CartRef);
-  const CartData=DocRef.data();
+//   } catch (error) {
+//     // Handle errors and send an error response
+//     console.error("Error adding product: ", error);
+//     res.status(500).send({error:"Product is not added"});
+//   }
+// });
 
+// // ################################# SubmenuApi #################################
+app.get('/submenuApi', async (req, res) => {
+  // // get catergory id
+  const tableid = req.query.tableid;
+  const categoryid=req.query.categoryid;
   try {
+    //Get particular data from submenu
+    const docRef = doc(db, 'Product', categoryid);
+    const docSnap = await getDoc(docRef);
+    const Product = docSnap.data();
 
-    const itemIndex = CartData.cart.findIndex(item => item.id === data.id);
-  
-    if (itemIndex !== -1) {
-      // Item exists, update its quantity and price
-      CartData.cart[itemIndex].Amount += data.Amount;
-      CartData.cart[itemIndex].Price += data.Price;
-    } else {
-      // Item does not exist, add it to the cart
-      CartData.cart.push(data);
-    }
-       CartData.totalItem += data.Amount; // Update totalItem
-      CartData.totalAmount += data.Price; // Update totalAmount
-  
-    // Set the updated data in Firestore
-    await setDoc(CartRef, CartData);
-    
-    res.status(200).send('Cart updated successfully');  
+    //send data to the submenu component 
+    res.status(200).json( {Product} );
   } catch (error) {
-    console.log(error);
+    console.log("Error occurs", error);
+    res.status(200).send({ Error: "Error occurs" });
   }
 
 });
 
-app.put('/cartApi',async(req,res)=>{
-   const {id,Name,Amount,Price,action}=req.body;
+app.post('/submenuApi', async (req, res) => {
+
+});
+
+
+
+// //################################## CartAPI ###################################
+// fetch cart state
+app.get('/cartApi', async (req, res) => {
  
-   const CartRef=doc(db,'Cart',id)
+  
 
-  const DocRef=await getDoc(CartRef);
-  const CartData=DocRef.data();
+  const id = req.query.id;
+  // console.log(id);
 
+  const Product = collection(db, "Cart");
+  const snapshot = await getDocs(Product);
+  const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+// console.log(list);
+
+if(list){
+  res.status(200).send(list);
+}
+else{
+  res.status(400).send("Internal server error!!")
+}
+
+// using table id get cart state for particular id
+// and sent cart state to client
+ 
+});
+
+// // Addtocart
+app.post('/cartApi', async (req, res) => {
+
+  const { categoryid,  tableid ,name,price,amount } = req.body;
+
+
+  const data = {
+    categoryid ,name,price,amount
+  }
+
+
+  const quantity = Number.parseInt(amount);
+  //get data from the  
+  const CartRef = doc(db, 'Cart', tableid)
+
+  const DocRef = await getDoc(CartRef);
+  const CartData = DocRef.data();
+
+
+  
+  
+  
+  
   try {
-   
+    
+    const itemIndex = CartData.cart.findIndex(item => item.id === data.categoryid);
+    const ExistingProduct= CartData.cart[itemIndex];
+// console.log(itemIndex)
+    if (itemIndex !== -1 && quantity <= 0 ) {
+      CartData.cart.splice(indexFound, 1);
+      if (CartData.cart.length == 0) {
+        CartData.cart.subTotal = 0;
+      } else {
+        CartData.cart[itemIndex].quantity += quantity;
+        CartData.cart[itemIndex].total = CartData.cart[itemIndex].quantity * CartData.cart[itemIndex].price;
+
+        // Update subtotal and other properties
+        CartData.cart.subTotal = CartData.cart.map(item => item.total).reduce((acc, next) => acc + next, 0);
+        CartData.totalItem = CartData.cart.length;
+        CartData.totalAmount = CartData.cart.subTotal;
+      }
+
+    }
+    //----------Check if product exist, just add the previous quantity with the new quantity and update the total price-------
+    else if (itemIndex >= 0){
+     
+      const quantity= ExistingProduct.quantity += 1;
+
+     ExistingProduct.total = quantity * ExistingProduct.price;
+      
+     CartData.cart.subTotal = CartData.cart
+      .map(item => item.total)
+      .reduce((acc, next) => acc + next, 0);
+      // // update totalItem
+      CartData.totalItem = CartData.cart.map(item => item.quantity).reduce((acc, next) => acc + next, 0);
+      CartData.totalAmount = CartData.cart.subTotal;
+      await setDoc(CartRef, CartData);
+      res.status(200).json({
+        type: "success",
+        message: "Product already Exist in Cart!!"
+      })
+
+
+    }
+    //----Check if quantity is greater than 0 then add item to items array ----
+    else if (quantity > 0) {
+      CartData.cart.push({
+       id:categoryid,
+        name: name,
+        quantity: quantity,
+        price: data.price,
+        total: parseInt(data.price * quantity)
+      })
+      CartData.cart.subTotal = CartData.cart
+        .map(item => item.total)
+        .reduce((acc, next) => acc + next, 0);
+
+      // update totalItem
+      CartData.totalItem = CartData.cart.map(item => item.quantity).reduce((acc, next) => acc + next, 0);
+      CartData.totalAmount = CartData.cart.subTotal;
+      await setDoc(CartRef, CartData);
+
+      res.status(200).json({
+        type: "success",
+        message: "Product added sucessfully!!"
+      })
+
+    }
+    //----If quantity of price is 0 throw the error -------
+    else {
+      return res.status(400).json({
+        type: "error",
+        message: "Invalid request"
+      })
+    }
+  }
+  catch (error) {
+    console.log(error)
+    res.status(500).json({ error });
+  }
+  // Set the updated data in Firestore  
+})
+
+// // inc dec from cart  
+app.put('/cartApi', async (req, res) => {
+
+//  console.log(req);
+
+  const { name, action, quantity, price, tableid,id } = req.body.data;
+
+  console.log(action);
+
+  const Qty = Number.parseInt(quantity);
+  const CartRef = doc(db, 'Cart', tableid);
+  const DocRef = await getDoc(CartRef);
+
+  if (!DocRef.exists()) {
+    console.error('Cart not found');
+    return; // or send an error response
+  }
+
+  const CartData = DocRef.data();
+  //  console.log(CartData);
+  try {
     const itemIndex = CartData.cart.findIndex(item => item.id === id);
+    const ExistingProduct= CartData.cart[itemIndex];
+    // console.log(ExistingProduct)
+    if (action === 'inc') {
+  //     // Update item quantity and price
+  const quantity= ExistingProduct.quantity += 1;
 
-    if (action=="Inc") {
-      // Item exists, update its quantity and price
-      CartData.cart[itemIndex].Amount +=Amount;
-      CartData.cart[itemIndex].Price += Price;
+  ExistingProduct.total = quantity * ExistingProduct.price;
+   
+  CartData.cart.subTotal = CartData.cart
+   .map(item => item.total)
+   .reduce((acc, next) => acc + next, 0);
+   // // update totalItem
+   CartData.totalItem = CartData.cart.map(item => item.quantity).reduce((acc, next) => acc + next, 0);
+   CartData.totalAmount = CartData.cart.subTotal;
+   await setDoc(CartRef, CartData);
+   res.status(200).json({
+     type: "success",
+     message: "Item quantity increased!!"
+   })
 
-      CartData.totalItem += Amount; // Update totalItem
-      CartData.totalAmount += Price; // Update totalAmount
+
+
+
+
+
+  // //     // update totalitem and totalQnty
+
+      CartData.totalItem = CartData.cart.map(item => item.quantity).reduce((acc, next) => acc + next, 0);
+      CartData.totalAmount = CartData.cart.subTotal;
+      await setDoc(CartRef, CartData);
+    } else if (action === 'dec') {
+      // console.log("hello")
+  //     // Decrement logic
+  if (ExistingProduct.quantity === 1 && action === 'dec') {
+    console.log("hello");
+
+    CartData.cart.splice(itemIndex, 1);
+    CartData.cart.subTotal = CartData.cart
+        .map(item => item.total)
+        .reduce((acc, next) => acc + next, 0);
+    CartData.totalItem = CartData.cart
+        .map(item => item.quantity)
+        .reduce((acc, next) => acc + next, 0);
+    CartData.totalAmount = CartData.cart.subTotal;
+
+    await setDoc(CartRef, CartData);
+} else {
+        const quantity= ExistingProduct.quantity -= 1;
+      
+  ExistingProduct.total = quantity * ExistingProduct.price;
+   
+  CartData.cart.subTotal = CartData.cart
+   .map(item => item.total)
+   .reduce((acc, next) => acc + next, 0);
+   // // update totalItem
+   CartData.totalItem = CartData.cart.map(item => item.quantity).reduce((acc, next) => acc + next, 0);
+   CartData.totalAmount = CartData.cart.subTotal;
+   await setDoc(CartRef, CartData);
+
+    res.status(200).json({
+      type: "error",
+      message: "Item quantity decreased"
+    })
+ 
+   
+      }
+
+  //     
+  //       // update totalitem and totalQnty
+
+  
+        
+      
+
+    } else {
+      console.error('Invalid action');
+      return res.status(500).json({
+        type: "error",
+        message: "Internal Server Error"
+      });
     }
 
-    if (action=="Dec") {
-      // Item exists, update its quantity and price
-      CartData.cart[itemIndex].Amount -=Amount;
-      CartData.cart[itemIndex].Price -= Price;
-
-      CartData.totalItem -= Amount; // Update totalItem
-      CartData.totalAmount -= Price; // Update totalAmount
-    }
-
-
-   res.status(200).send("cart status updated !!!!");
-
+    
 
   } catch (error) {
-    console.log('Error occurs:' , error)
+    res.status(500).json({ error });  
+  }}
+)
+
+// // delete from cart
+app.delete('/cartApi', async (req, res) => {
+  const { id, tableid } = req.body;
+console.log(id);
+  //GET data from the  CART 
+  const CartRef = doc(db, 'Cart', tableid)
+  const DocRef = await getDoc(CartRef);
+  const CartData = DocRef.data();
+
+  try {
+    // Find the index of the item to remove
+    const itemIndex = CartData.cart.findIndex(item => item.id=== id);
+
+    if (itemIndex === -1) {
+      return res.status(404).send('Item not found in cart');
+    }
+
+    // Remove the item from the cart
+    CartData.cart.splice(itemIndex, 1);
+    CartData.cart.subTotal = CartData.cart
+        .map(item => item.total)
+        .reduce((acc, next) => acc + next, 0);
+    CartData.totalItem = CartData.cart
+        .map(item => item.quantity)
+        .reduce((acc, next) => acc + next, 0);
+    CartData.totalAmount = CartData.cart.subTotal;
+
+    await setDoc(CartRef, CartData);
+
+    res.status(200).json({
+      type: "success",
+      message: "Product remove sucessfully!!"
+    })
+    // res.status(200).send('Item removed from cart successfully');
+  } catch (error) {
+    console.error('Error removing item from cart:', error);
+    res.status(500).json({
+      type: "error",
+      message: "Internal Server Error"
+    });
     res.status(500).send('Internal Server Error');
   }
-      
-   
 })
 
-app.delete('/cartApi',async(req,res)=>{
-  const {id,Name,Amount,Price}=req.body;
+// ######################################Cart Api #################################################### //
+app.get('orderApi',async (req,res)=>{
+  console.log(req);
+  // const id = req.query.id;
+  // console.log(id);
+
+  // const Product = collection(db, "Product");
+  // const snapshot = await getDocs(Product);
+  // const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  // res.send(list);
+})
+
+
+
+app.post('/orderApi',async (req,res)=>{
+  // save form data + cart state + date + order
+  const {name, mobile, note, email, categoryid, id}=req.body;
+  console.log("data from form ",name,mobile,note,email,categoryid,id)
+ 
+ const currentDate=new Date()
   
-  const data={
-    id,Name,Amount,Price
-   }
-  //GET data from the  CART 
-  const CartRef=doc(db,'Cart',id)
-
-  
-  const DocRef=await getDoc(CartRef);
-  const CartData=DocRef.data();
-
-
-
-
-
   try {
+  //get data from the  Cart
+  const CartRef = doc(db, 'Cart', id)
 
-   const updatedCart = CartData.cart.findIndex(item => item.id !== id);
+  const DocRef = await getDoc(CartRef);
+  const CartData = DocRef.data();  
 
+  // make Order Ref
+  const OrderRef = doc(db, 'Order', id);
 
-
-
-   CartData.cart.push(updatedCart);
-   CartData.totalItem -= data.Amount; // Update totalItem
-   CartData.totalAmount -= data.Price; // Update totalAmount
-
-   await setDoc(CartRef, CartData);
-   
-    res.status(200).send('Document Deleted sucessfully');
-  } catch (error) {
-    console.log('Error occurs:' , error)
-    res.status(500).send('Internal Server Error');  
+  // Saved the data to the 'Cart' collection
+  const data={
+    Order:[
+      {
+        Name:name,
+        Mobile:mobile,
+        Email:email,Note:note,
+        CartData,
+        totalAmount:CartData.totalAmount,
+        totalItem:CartData.totalItem,
+        Date:currentDate.toLocaleDateString(),
+        Time:currentDate.toLocaleTimeString()
+      }
+      
+    ] 
+    
   }
 
+  await setDoc(OrderRef, data, { merge: true });
+
+  } catch (error) {  
+    console.log("Error to do opreation",error)
+  }
+
+
 })
 
-
-//BUYApi
-app.get('/buyApi', (req, res) => {
-
-
-});
-
-app.post('/buyApi', (req, res) => {
-//save data to order data base 
- try {
-
-  
- } catch (error) {
-  console.log('Error occurs:' , error)
-  res.status(500).send('Internal Server Error');
- }
-
-});
-
-// orderapi
-app.get('/orderApi', (req, res) => {
-
-// fetch data from the order database and show it on admin dashboard as well as chief
-});
-
-app.post('/orderApi', (req, res) => {
-//save admin action proceed to bill then make Proceed_to_bill=="OK";
-// in cheif if action == completed then field order=="completed"
- try {
-
-  
- } catch (error) {
-  console.log('Error occurs:' , error)
-  res.status(500).send('Internal Server Error');
- }
-
-});
 
 
 

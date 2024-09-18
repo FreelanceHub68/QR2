@@ -1,13 +1,12 @@
 "use client"
 
-import Loginprovider from "../../../../contextApi/loginContextApi";
+import  LoginContext  from "../../../../contextApi/LoginContextApi"
 
-export default function Layout({ children }) {
-  return (
-<Loginprovider>
-           {children}
-</Loginprovider>      
-     
-       
-    );
+export default function Layout({children}){
+    return(
+<LoginContext>
+    {children}
+</LoginContext>
+
+)
 }

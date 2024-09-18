@@ -1,4 +1,4 @@
-import Login from "@/app/component/login"
+import Login from "@/app/component/client/login";
 
 export default function login(){
     return(
